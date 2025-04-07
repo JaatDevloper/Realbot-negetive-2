@@ -522,7 +522,11 @@ async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
     # Get the timer duration, default to 15 seconds
     timer_duration = question.get("timer_duration", 15)
     
-    # Send the question with timer
+    # Get current question number and total questions
+    current_question = context.user_data.get("current_question_number", 1)
+    total_questions = context.user_data.get("total_questions", len(marathon_questions) + current_question)
+    
+    # Send the question with timer and question number
     await context.bot.send_poll(
         chat_id=chat_id,
         question=question["question"],
@@ -530,12 +534,13 @@ async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
         type=Poll.QUIZ,
         correct_option_id=question["answer"],
         is_anonymous=False,
-        explanation="Marathon mode quiz",
+        explanation=f"Question {current_question}/{total_questions} - Marathon mode",
         open_period=timer_duration  # Add timer animation
     )
     
     # Update the remaining questions
     context.user_data["marathon_questions"] = marathon_questions[1:]
+    context.user_data["current_question_number"] = current_question + 1
     
     # Schedule the next question if we have more
     if context.user_data["marathon_questions"]:
