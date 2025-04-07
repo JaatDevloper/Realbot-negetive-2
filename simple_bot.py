@@ -483,6 +483,38 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "You haven't answered any quiz questions yet. Use /play to start a quiz!"
         )
 
+async def negative_marking_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Toggle negative marking on/off"""
+    settings = load_settings()
+    
+    # Toggle the current setting
+    current_setting = settings.get("negative_marking", False)
+    settings["negative_marking"] = not current_setting
+    
+    # Save the updated settings
+    save_settings(settings)
+    
+    # Inform the user
+    new_status = "ON" if settings["negative_marking"] else "OFF"
+    neg_ratio = settings.get("negative_ratio", 0.25)
+    
+    if settings["negative_marking"]:
+        message = (
+            f"*Negative Marking: {new_status}* ✅\n\n"
+            f"*Scoring System*\n"
+            f"• Correct answer: +1 to rating\n"
+            f"• Wrong answer: -{neg_ratio} from rating\n\n"
+            f"Use /negativevalue to adjust the deduction ratio."
+        )
+    else:
+        message = (
+            f"*Negative Marking: {new_status}* ❌\n\n"
+            f"Standard scoring will be used (1 rating per correct answer, no deductions).\n\n"
+            f"Use this command again to enable negative marking."
+        )
+    
+    await update.message.reply_text(message, parse_mode='Markdown')
+
 async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start a new quiz"""
     questions = load_questions()
