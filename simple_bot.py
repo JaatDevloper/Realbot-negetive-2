@@ -324,6 +324,29 @@ def parse_telegram_quiz_url(url):
         logger.error(traceback.format_exc())
         return None
 
+def load_settings():
+    """Load settings from the JSON file"""
+    SETTINGS_FILE = "settings.json"
+    try:
+        if os.path.exists(SETTINGS_FILE):
+            with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        return {}  # Default empty settings
+    except Exception as e:
+        logger.error(f"Error loading settings: {e}")
+        return {}
+
+def save_settings(settings):
+    """Save settings to the JSON file"""
+    SETTINGS_FILE = "settings.json"
+    try:
+        with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump(settings, f)
+        return True
+    except Exception as e:
+        logger.error(f"Error saving settings: {e}")
+        return False
+
 def load_users():
     """Load users from the JSON file"""
     try:
