@@ -452,14 +452,17 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 # Get the timer duration, default to 15 seconds
                 timer_duration = question.get("timer_duration", 15)
                 
+                # Add question number to the question text in square brackets
+                question_text = f"[1/{len(matching_questions)}] {question['question']}"
+                
                 await context.bot.send_poll(
                     chat_id=update.effective_chat.id,
-                    question=question["question"],
+                    question=question_text,  # Use the modified question text with number
                     options=question["options"],
                     type=Poll.QUIZ,
                     correct_option_id=question["answer"],
                     is_anonymous=False,
-                    explanation=f"Question 1/{len(matching_questions)} - Marathon mode",
+                    explanation="Marathon mode",
                     open_period=timer_duration  # Add timer animation
                 )
             
