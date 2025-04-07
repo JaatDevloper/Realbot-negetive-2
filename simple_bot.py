@@ -515,6 +515,77 @@ async def negative_marking_command(update: Update, context: ContextTypes.DEFAULT
     
     await update.message.reply_text(message, parse_mode='Markdown')
 
+async def negative_value_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Change the negative marking ratio"""
+    if not context.args:
+        # If no arguments provided, show current value and options
+        settings = load_settings()
+        current_value = settings.get("negative_ratio", 0.25)
+        neg_status = "ON" if settings.get("negative_marking", False) else "OFF"
+        
+        message = (
+            f"*Negative Marking Settings*\n\n"
+            f"• Status: {neg_status}\n"
+            f"• Current deduction: -{current_value} from answer rating\n\n"
+            f"*Change Deduction Ratio*\n"
+            f"• /negativevalue 0.25  (¼ rating)\n"
+            f"• /negativevalue 0.33  (⅓ rating)\n"
+            f"• /negativevalue 0.5   (½ rating)\n"
+            f"• /negativevalue 1.0   (full rating)\n"
+        )
+        
+        await update.message.reply_text(message, parse_mode='Markdown')
+        return
+    
+    try:
+        # Try to parse the value
+        new_value = float(context.args[0])
+        
+        # Validate the value (must be between 0 and 1)
+        if new_value < 0 or new_value > 1:
+            await update.message.reply_text(
+                "❌ *Invalid Value*\n\n"
+                "The negative marking ratio must be between 0 and 1.\n\n"
+                "Valid options: 0.25 (¼), 0.33 (⅓), 0.5 (½), 1.0 (full rating)",
+                parse_mode='Markdown'
+            )
+            return
+        
+        # Update the settings
+        settings = load_settings()
+        settings["negative_ratio"] = new_value
+        save_settings(settings)
+        
+        # Get a fraction representation if it's a common fraction
+        fraction_text = ""
+        if new_value == 0.25:
+            fraction_text = " (¼)"
+        elif new_value == 0.33:
+            fraction_text = " (⅓)"
+        elif new_value == 0.5:
+            fraction_text = " (½)"
+        elif new_value == 1.0:
+            fraction_text = " (1)"
+            
+        # Inform the user
+        neg_status = "ON" if settings.get("negative_marking", False) else "OFF"
+        
+        message = (
+            f"✅ *Negative Marking Updated*\n\n"
+            f"• Deduction ratio: -{new_value}{fraction_text} from answer rating\n"
+            f"• Status: {neg_status}\n\n"
+            f"Use /negativemarking to toggle negative marking on/off."
+        )
+        
+        await update.message.reply_text(message, parse_mode='Markdown')
+        
+    except ValueError:
+        await update.message.reply_text(
+            "❌ *Invalid Format*\n\n"
+            "Please use a decimal number like 0.25, 0.33, 0.5, or 1.0",
+            parse_mode='Markdown'
+        )
+
 async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start a new quiz"""
     questions = load_questions()
