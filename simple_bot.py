@@ -414,6 +414,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handler for the /help command"""
+    # Load settings to check negative marking status
+    settings = load_settings()
+    neg_mark_status = "ON" if settings.get("negative_marking", False) else "OFF"
+    neg_ratio = settings.get("negative_ratio", 0.25)
+    
     help_text = (
         "📚 *Available Commands* 📚\n\n"
         "/start - Start the bot\n"
@@ -425,10 +430,13 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/edit - Edit an existing quiz\n"
         "/remove - Delete a quiz question\n"
         "/saveforward - Save a forwarded quiz\n"
+        "/negativemarking - Toggle negative marking (currently {0})\n"
+        "/negativevalue - Change negative marking ratio (currently {1})\n"
         "/cancel - Cancel current operation\n"
         "/help - Show this help message\n\n"
         "To save a quiz someone sent you, forward it to me and I'll ask if you want to save it!"
-    )
+    ).format(neg_mark_status, neg_ratio)
+    
     await update.message.reply_text(help_text, parse_mode='Markdown')
 
 async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
