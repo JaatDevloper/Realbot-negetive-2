@@ -371,6 +371,7 @@ def save_user_data(user_data):
 def update_user_stats(user_id, user_name, is_correct):
     """Update user statistics"""
     user_data = load_users()
+    settings = load_settings()
     
     # Convert user_id to string for JSON compatibility
     user_id = str(user_id)
@@ -379,12 +380,24 @@ def update_user_stats(user_id, user_name, is_correct):
         user_data[user_id] = {
             "name": user_name,
             "correct": 0,
-            "total": 0
+            "total": 0,
+            "points": 0  # Add points field for negative marking
         }
     
+    # Update total questions answered
     user_data[user_id]["total"] += 1
+    
+    # Update correct answers count
     if is_correct:
         user_data[user_id]["correct"] += 1
+        # Add 1 point for correct answer
+        user_data[user_id]["points"] = user_data[user_id].get("points", 0) + 1
+    else:
+        # Apply negative marking if enabled
+        if settings.get("negative_marking", False):
+            negative_ratio = settings.get("negative_ratio", 0.25)
+            # Deduct points based on the negative ratio
+            user_data[user_id]["points"] = user_data[user_id].get("points", 0) - negative_ratio
     
     return save_user_data(user_data)
 
