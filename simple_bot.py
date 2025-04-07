@@ -529,15 +529,18 @@ async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
     current_question = context.user_data.get("current_question_number", 1)
     total_questions = context.user_data.get("total_questions", len(marathon_questions) + current_question)
     
-    # Send the question with timer and question number
+    # Add question number to the question text in square brackets
+    question_text = f"[{current_question}/{total_questions}] {question['question']}"
+    
+    # Send the question with timer and question number in the question text
     await context.bot.send_poll(
         chat_id=chat_id,
-        question=question["question"],
+        question=question_text,  # Use the modified question text with number
         options=question["options"],
         type=Poll.QUIZ,
         correct_option_id=question["answer"],
         is_anonymous=False,
-        explanation=f"Question {current_question}/{total_questions} - Marathon mode",
+        explanation="Marathon mode",
         open_period=timer_duration  # Add timer animation
     )
     
