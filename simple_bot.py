@@ -435,19 +435,41 @@ async def stats_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handler for the /stats command"""
     user = update.effective_user
     user_data = load_users()
+    settings = load_settings()
     user_id = str(user.id)
     
     if user_id in user_data:
         stats = user_data[user_id]
         accuracy = (stats["correct"] / stats["total"] * 100) if stats["total"] > 0 else 0
         
-        await update.message.reply_text(
+        # Get total points (or initialize if not present in older data)
+        points = stats.get("points", stats["correct"])
+        
+        # Create an elegant statistics message
+        stats_message = (
             f"📊 *Your Quiz Statistics* 📊\n\n"
-            f"Total questions answered: {stats['total']}\n"
+            f"Questions attempted: {stats['total']}\n"
             f"Correct answers: {stats['correct']}\n"
-            f"Accuracy: {accuracy:.1f}%",
-            parse_mode='Markdown'
+            f"Accuracy: {accuracy:.1f}%\n"
         )
+        
+        # Add negative marking information if enabled
+        if settings.get("negative_marking", False):
+            neg_ratio = settings.get("negative_ratio", 0.25)
+            stats_message += (
+                f"\n*Scoring System*\n"
+                f"• Correct: +1 answer rating\n"
+                f"• Incorrect: -{neg_ratio} answer rating\n"
+                f"*Total answer rating: {points:.1f}*"
+            )
+        else:
+            stats_message += (
+                f"\n*Scoring System*\n"
+                f"• Each correct answer: +1 to rating\n"
+                f"*Total answer rating: {points}*"
+            )
+        
+        await update.message.reply_text(stats_message, parse_mode='Markdown')
     else:
         await update.message.reply_text(
             "You haven't answered any quiz questions yet. Use /play to start a quiz!"
