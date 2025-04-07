@@ -471,6 +471,8 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 context.user_data["marathon_questions"] = matching_questions[1:]
                 context.user_data["marathon_question_index"] = 0
                 context.user_data["marathon_chat_id"] = update.effective_chat.id
+                # Set current question number to 2 for the next question
+                context.user_data["current_question_number"] = 2  # Start with 2 for the next question
                 
                 # Schedule the first question after 15 seconds
                 await schedule_next_question(context)
