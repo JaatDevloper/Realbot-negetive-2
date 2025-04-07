@@ -445,6 +445,9 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
             # Send the first question
             if matching_questions:
                 question = matching_questions[0]
+                # Get the timer duration, default to 15 seconds
+                timer_duration = question.get("timer_duration", 15)
+                
                 await context.bot.send_poll(
                     chat_id=update.effective_chat.id,
                     question=question["question"],
@@ -452,7 +455,8 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     type=Poll.QUIZ,
                     correct_option_id=question["answer"],
                     is_anonymous=False,
-                    explanation="Marathon mode quiz"
+                    explanation="Marathon mode quiz",
+                    open_period=timer_duration  # Add timer animation
                 )
             
             # Store the remaining questions in user_data for the timer
@@ -469,9 +473,12 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
         except ValueError:
             await update.message.reply_text("Invalid ID format. Please use a number.")
             return
-    
+
     # If no ID specified or invalid ID, select a random question
     question = random.choice(questions)
+    
+    # Get the timer duration, default to 15 seconds
+    timer_duration = question.get("timer_duration", 15)
     
     # Send the quiz poll
     await context.bot.send_poll(
@@ -480,7 +487,8 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
         options=question["options"],
         type=Poll.QUIZ,
         correct_option_id=question["answer"],
-        is_anonymous=False
+        is_anonymous=False,
+        open_period=timer_duration  # Add timer animation
     )
     
     # Update stats for this user
