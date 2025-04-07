@@ -1401,6 +1401,10 @@ def main():
     application.add_handler(CommandHandler("list", list_quizzes))
     application.add_handler(CommandHandler("remove", remove_quiz))
     
+    # Add negative marking command handlers
+    application.add_handler(CommandHandler("negativemarking", negative_marking_command))
+    application.add_handler(CommandHandler("negativevalue", negative_value_command))
+    
     # Handle poll answers
     application.add_handler(PollHandler(handle_poll_answer))
     
@@ -1459,7 +1463,6 @@ def main():
     
     # Start the Bot
     application.run_polling()
-# Function to get the next available question ID
 
 def get_next_question_id():
     questions = load_questions()
