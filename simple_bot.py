@@ -442,6 +442,10 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Questions will be sent every 15 seconds."
             )
             
+            # Initialize question numbering
+            context.user_data["current_question_number"] = 1
+            context.user_data["total_questions"] = len(matching_questions)
+            
             # Send the first question
             if matching_questions:
                 question = matching_questions[0]
@@ -455,7 +459,7 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     type=Poll.QUIZ,
                     correct_option_id=question["answer"],
                     is_anonymous=False,
-                    explanation="Marathon mode quiz",
+                    explanation=f"Question 1/{len(matching_questions)} - Marathon mode",
                     open_period=timer_duration  # Add timer animation
                 )
             
