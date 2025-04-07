@@ -515,7 +515,10 @@ async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
     question = marathon_questions[0]
     chat_id = context.user_data.get("marathon_chat_id")
     
-    # Send the question
+    # Get the timer duration, default to 15 seconds
+    timer_duration = question.get("timer_duration", 15)
+    
+    # Send the question with timer
     await context.bot.send_poll(
         chat_id=chat_id,
         question=question["question"],
@@ -523,7 +526,8 @@ async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
         type=Poll.QUIZ,
         correct_option_id=question["answer"],
         is_anonymous=False,
-        explanation="Marathon mode quiz"
+        explanation="Marathon mode quiz",
+        open_period=timer_duration  # Add timer animation
     )
     
     # Update the remaining questions
