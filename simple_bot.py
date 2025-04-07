@@ -635,13 +635,44 @@ async def handle_poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Check if the answer is correct
     is_correct = (selected_option == correct_option)
     
+    # Load settings to check if negative marking is enabled
+    settings = load_settings()
+    negative_marking = settings.get("negative_marking", False)
+    negative_ratio = settings.get("negative_ratio", 0.25)
+    
     # Update user stats
     update_user_stats(user_id, user_name, is_correct)
+    
+    # Get user data and current points
+    user_data = load_users()
+    user_data_entry = user_data.get(str(user_id), {})
+    points = user_data_entry.get("points", 0)
+    
+    # Create elegant feedback message
+    if is_correct:
+        feedback_message = "✅ That's right!"
+    else:
+        feedback_message = "❌ Not quite..."
+    
+    # Add point information based on negative marking settings
+    if negative_marking:
+        if is_correct:
+            feedback_message += f"\nYour answer rating: {points:.1f} (+1)"
+        else:
+            feedback_message += f"\nYour answer rating: {points:.1f} (-{negative_ratio})"
+    else:
+        if is_correct:
+            feedback_message += f"\nYour answer rating: {points}"
+        else:
+            feedback_message += f"\nYour answer rating remains {points}"
+    
+    # Add play again prompt
+    feedback_message += "\n\nReady for another? /play"
     
     # Send feedback message
     await context.bot.send_message(
         chat_id=user_id,
-        text=f"{'✅ Correct!' if is_correct else '❌ Wrong!'} Use /play to try another quiz."
+        text=feedback_message
     )
 
 async def add_quiz(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
