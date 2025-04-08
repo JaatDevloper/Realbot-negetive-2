@@ -2003,6 +2003,60 @@ async def handle_edit_selection(update: Update, context: ContextTypes.DEFAULT_TY
             f"I've sent the quiz for testing. If you need to make more changes, use /edit {question_id}"
         )
 
+async def handle_poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handler for when a user answers a poll"""
+    answer = update.poll_answer
+    
+    # Initialize player scores dict if it doesn't exist
+    if "player_scores" not in context.user_data:
+        context.user_data["player_scores"] = {}
+    
+    # Get user info
+    user = answer.user
+    user_id = user.id
+    user_name = user.first_name
+    if user.last_name:
+        user_name += f" {user.last_name}"
+    
+    # Get current question
+    current_question = context.user_data.get("current_question", {})
+    correct_option = current_question.get("answer", 0)
+    
+    # Initialize this player's data if they're not already in the dict
+    if user_id not in context.user_data["player_scores"]:
+        context.user_data["player_scores"][user_id] = {
+            "name": user_name,
+            "score": 0,
+            "correct": 0,
+            "incorrect": 0,
+            "time_taken": time.time(),  # Start time
+            "start_time": time.time()
+        }
+    
+    # Get the selected option
+    selected_options = answer.option_ids
+    if not selected_options:
+        return
+        
+    selected_option = selected_options[0]
+    
+    # Update score based on correctness
+    if selected_option == correct_option:
+        # Correct answer: +5 points
+        context.user_data["player_scores"][user_id]["score"] += 5
+        context.user_data["player_scores"][user_id]["correct"] += 1
+    else:
+        # Wrong answer: -2 points
+        context.user_data["player_scores"][user_id]["score"] -= 2
+        context.user_data["player_scores"][user_id]["incorrect"] += 1
+    
+    # Update time taken (time elapsed since they started the quiz)
+    elapsed_time = time.time() - context.user_data["player_scores"][user_id]["start_time"]
+    context.user_data["player_scores"][user_id]["time_taken"] = elapsed_time
+    
+    # Debug log (optional)
+    print(f"User {user_name} answered. Score now: {context.user_data['player_scores'][user_id]['score']}")
+
 async def handle_poll_id_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle selection of ID method for poll conversion"""
     query = update.callback_query
