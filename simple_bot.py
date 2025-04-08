@@ -723,45 +723,6 @@ async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
     if context.user_data["marathon_questions"]:
         await schedule_next_question(context)
 
-async def show_final_results(context: ContextTypes.DEFAULT_TYPE):
-    """Show final quiz results with a leaderboard sorted by score and time"""
-    # Get chat_id from context - adjust this to match your variable name
-    chat_id = context.user_data.get("marathon_chat_id")  # Or however you store the chat ID
-    
-    # Get player data - adjust to match your data structure
-    player_data = context.user_data.get("player_scores", {})  # Or however you store scores
-    
-    # Sort players by score (descending) and time taken (ascending)
-    leaderboard = sorted(player_data.values(), key=lambda x: (-x["score"], x["time_taken"]))
-    
-    # Create the leaderboard message
-    text = f"🏁 *The quiz has finished!*\n\n"
-    total_questions = context.user_data.get("total_questions", 0)
-    text += f"{total_questions} questions answered\n\n"
-    
-    # Add each player to the leaderboard with appropriate medal
-    for i, player in enumerate(leaderboard, 1):
-        name = player['name']
-        score = player['score']
-        
-        # Format time nicely
-        time_sec = round(player['time_taken'], 1)
-        minutes = int(time_sec // 60)
-        seconds = time_sec % 60
-        time_str = f"{minutes} min {int(seconds)} sec" if minutes > 0 else f"{time_sec} sec"
-        
-        # Assign medals for top 3 positions
-        medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"{i}."
-        
-        # Add this player's entry to the leaderboard
-        text += f"{medal} {name} – {score} ({time_str})\n"
-    
-    # Add congratulations message at the end
-    text += "\n🏆 Congratulations to the winner!"
-    
-    # Send the message
-    await context.bot.send_message(chat_id=chat_id, text=text, parse_mode="Markdown")
-
 async def handle_poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handler for when a user answers a poll"""
     answer = update.poll_answer
