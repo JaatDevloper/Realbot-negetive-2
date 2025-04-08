@@ -588,6 +588,9 @@ async def negative_value_command(update: Update, context: ContextTypes.DEFAULT_T
 
 async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Start a new quiz"""
+    # Store chat_id for later use in show_final_results
+    context.user_data["marathon_chat_id"] = update.effective_chat.id
+    
     questions = load_questions()
     
     if not questions:
@@ -610,7 +613,6 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"📊 Starting a quiz with {len(matching_questions)} questions (ID: {requested_id}).\n"
                 "Questions will be sent every 15 seconds."
             )
-            
             # Initialize question numbering
             context.user_data["current_question_number"] = 1
             context.user_data["total_questions"] = len(matching_questions)
@@ -634,8 +636,8 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     explanation="Marathon mode",
                     open_period=timer_duration  # Add timer animation
                 )
-            
-            # Store the remaining questions in user_data for the timer
+
+                # Store the remaining questions in user_data for the timer
             if len(matching_questions) > 1:
                 context.user_data["marathon_questions"] = matching_questions[1:]
                 context.user_data["marathon_question_index"] = 0
@@ -668,7 +670,7 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
         is_anonymous=False,
         open_period=timer_duration  # Add timer animation
     )
-    
+
     # Update stats for this user
     user_id = update.effective_user.id
     stats = load_stats()
