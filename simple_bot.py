@@ -1421,7 +1421,7 @@ def main():
     application.add_handler(PollAnswerHandler(handle_poll_answer))
     
     # Keep your existing PollHandler if you need it for other purposes
-    application.add_handler(PollHandler(handle_poll))
+    application.add_handler(PollAnswerHandler(handle_poll_answer))
     
     # Rest of your existing handlers...
     # Add conversation handler for quiz creation
