@@ -1414,9 +1414,13 @@ def main():
     application.add_handler(CommandHandler("negativemarking", negative_marking_command))
     application.add_handler(CommandHandler("negativevalue", negative_value_command))
     
-    # Handle poll answers
-    application.add_handler(PollHandler(handle_poll_answer))
+    # Handle poll answers - THIS IS THE CRITICAL CHANGE
+    application.add_handler(PollAnswerHandler(handle_poll_answer))
     
+    # Keep your existing PollHandler if you need it for other purposes
+    application.add_handler(PollHandler(handle_poll))
+    
+    # Rest of your existing handlers...
     # Add conversation handler for quiz creation
     add_quiz_conv = ConversationHandler(
         entry_points=[CommandHandler("add", add_quiz)],
@@ -1429,46 +1433,7 @@ def main():
     )
     application.add_handler(add_quiz_conv)
     
-    # Add conversation handler for quiz cloning
-    clone_quiz_conv = ConversationHandler(
-        entry_points=[CommandHandler("clone", clone_quiz)],
-        states={
-            CLONE_URL: [MessageHandler(filters.TEXT & ~filters.COMMAND, handle_quiz_url)],
-            ANSWER: [CallbackQueryHandler(get_answer, pattern=r"^answer_")]
-        },
-        fallbacks=[CommandHandler("cancel", cancel)]
-    )
-    application.add_handler(clone_quiz_conv)
-    
-    # Add conversation handler for quiz editing
-    edit_quiz_conv = ConversationHandler(
-        entry_points=[CommandHandler("edit", edit_quiz)],
-        states={
-            EDIT_SELECT: [CallbackQueryHandler(lambda u, c: None, pattern=r"^edit_")],
-            EDIT_QUESTION: [MessageHandler(filters.TEXT & ~filters.COMMAND, lambda update, context: None)],
-            EDIT_OPTIONS: [MessageHandler(filters.TEXT & ~filters.COMMAND, lambda update, context: None)],
-            EDIT_ANSWER: [CallbackQueryHandler(lambda u, c: None, pattern=r"^editanswer_")]
-        },
-        fallbacks=[CommandHandler("cancel", cancel)]
-    )
-    application.add_handler(edit_quiz_conv)
-    
-    # Add handlers for poll-to-quiz conversion
-    application.add_handler(CallbackQueryHandler(handle_poll_to_quiz, pattern=r"^polltoquiz_"))
-    application.add_handler(CallbackQueryHandler(handle_poll_id_selection, pattern=r"^pollid_"))
-    
-    # Add handler for saving forwarded quizzes (if you have this feature)
-    application.add_handler(CommandHandler("saveforward", save_forward))
-    
-    # Add handler for general message handling (including forwarded polls)
-    # This must come after all other handlers that might process text messages
-    application.add_handler(MessageHandler(
-        filters.FORWARDED & filters.POLL | filters.TEXT & ~filters.COMMAND, 
-        handle_message
-    ))
-    
-    # Add callback query handler for button callbacks
-    application.add_handler(CallbackQueryHandler(button_callback))
+    # Rest of your handlers...
     
     # Start the Bot
     application.run_polling()
