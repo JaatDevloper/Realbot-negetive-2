@@ -2060,6 +2060,14 @@ async def handle_poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE)
     # Debug log (optional)
     print(f"User {user_name} answered. Score now: {context.user_data['player_scores'][user_id]['score']}")
 
+async def handle_poll(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handler for when polls are sent to the bot"""
+    # Basic implementation to handle polls sent to your bot
+    message = update.effective_message
+    if message and message.poll:
+        # You could add logic here to do something with forwarded polls
+        pass
+
 async def handle_poll_id_selection(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle selection of ID method for poll conversion"""
     query = update.callback_query
