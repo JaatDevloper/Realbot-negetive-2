@@ -11,7 +11,7 @@ import requests
 from urllib.parse import urlparse
 from telegram import Update, Poll, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
-    Application, CommandHandler, ContextTypes, PollHandler, CallbackQueryHandler,
+    Application, CommandHandler, ContextTypes, PollHandler, PollAnswerHandler, CallbackQueryHandler,
     ConversationHandler, MessageHandler, filters
 )
 
