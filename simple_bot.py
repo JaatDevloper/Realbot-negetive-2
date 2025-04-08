@@ -682,6 +682,7 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_stats(stats)
 
 async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
+    """Send the next question in the quiz"""
     # Get the remaining questions
     marathon_questions = context.user_data.get("marathon_questions", [])
     
@@ -694,7 +695,9 @@ async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
     # Get the next question
     question = marathon_questions[0]
     timer_duration = question.get("timer_duration", 15)
-    context.user_data["last_timer_duration"] = timer_duration
+    
+    # Store the current question for the poll answer handler - THIS IS THE CRITICAL ADDITION
+    context.user_data["current_question"] = question
     
     # Get current question number and total questions
     current_question = context.user_data.get("current_question_number", 1)
