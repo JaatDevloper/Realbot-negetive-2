@@ -682,48 +682,55 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
     save_stats(stats)
 
 async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
-    """Schedule the next question in the marathon mode after a delay"""
-    # Wait for 15 seconds
-    await asyncio.sleep(15)
-    
-    # Check if we have remaining questions
+    # Get the remaining questions
     marathon_questions = context.user_data.get("marathon_questions", [])
-    if not marathon_questions:
-        return
     
+    if not marathon_questions:
+        # No more questions left, show the final results
+        await asyncio.sleep(15)  # Wait for the last question to finish
+        await show_final_results(context)
+        return
+        
     # Get the next question
     question = marathon_questions[0]
-    chat_id = context.user_data.get("marathon_chat_id")
-    
-    # Get the timer duration, default to 15 seconds
     timer_duration = question.get("timer_duration", 15)
+    context.user_data["last_timer_duration"] = timer_duration
     
     # Get current question number and total questions
     current_question = context.user_data.get("current_question_number", 1)
-    total_questions = context.user_data.get("total_questions", len(marathon_questions) + current_question)
+    total_questions = context.user_data.get("total_questions", 0)
     
     # Add question number to the question text in square brackets
     question_text = f"[{current_question}/{total_questions}] {question['question']}"
     
-    # Send the question with timer and question number in the question text
+    # Get the chat ID
+    chat_id = context.user_data.get("marathon_chat_id")
+    
+    # Send the poll
     await context.bot.send_poll(
         chat_id=chat_id,
-        question=question_text,  # Use the modified question text with number
+        question=question_text,
         options=question["options"],
         type=Poll.QUIZ,
         correct_option_id=question["answer"],
         is_anonymous=False,
-        explanation=".💔🗿𝘐𝘕𝘚𝘈𝘕𝘌",
-        open_period=timer_duration  # Add timer animation
+        explanation="Marathon mode",
+        open_period=timer_duration
     )
     
-    # Update the remaining questions
+    # Update user_data with remaining questions
     context.user_data["marathon_questions"] = marathon_questions[1:]
     context.user_data["current_question_number"] = current_question + 1
     
-    # Schedule the next question if we have more
+    # Schedule next question after timer_duration seconds
     if context.user_data["marathon_questions"]:
+        # If there are more questions, schedule the next one after timer_duration
+        await asyncio.sleep(timer_duration + 5)  # Wait a bit longer than the timer
         await schedule_next_question(context)
+    else:
+        # This was the last question, wait for timer to finish then show results
+        await asyncio.sleep(timer_duration + 5)  # Wait a bit longer than the timer
+        await show_final_results(context)
 
 async def handle_poll_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handler for when a user answers a poll"""
