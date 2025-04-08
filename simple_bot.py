@@ -2302,11 +2302,15 @@ async def handle_poll_id_selection(update: Update, context: ContextTypes.DEFAULT
 
 async def show_final_results(context: ContextTypes.DEFAULT_TYPE):
     """Show final quiz results with a leaderboard sorted by score and time"""
-    # Get chat_id from context - adjust this to match your variable name
-    chat_id = context.user_data.get("marathon_chat_id")  # Or however you store the chat ID
+    # Get the chat ID from where we stored it
+    chat_id = context.user_data.get("marathon_chat_id")
     
-    # Get player data - adjust to match your data structure
-    player_data = context.user_data.get("player_scores", {})  # Or however you store scores
+    # If for some reason it's not there, we can't proceed
+    if not chat_id:
+        return
+    
+    # Get player data from wherever you're storing it
+    player_data = context.user_data.get("player_scores", {})
     
     # Sort players by score (descending) and time taken (ascending)
     leaderboard = sorted(player_data.values(), key=lambda x: (-x["score"], x["time_taken"]))
@@ -2331,14 +2335,13 @@ async def show_final_results(context: ContextTypes.DEFAULT_TYPE):
         medal = "🥇" if i == 1 else "🥈" if i == 2 else "🥉" if i == 3 else f"{i}."
         
         # Add this player's entry to the leaderboard
-        text += f"{medal} {name} – {score} ({time_str})\n"
+        text += f"{medal} {name} – {score} points ({time_str})\n"
     
     # Add congratulations message at the end
     text += "\n🏆 Congratulations to the winner!"
     
     # Send the message
     await context.bot.send_message(chat_id=chat_id, text=text, parse_mode="Markdown")
-
 
 
 
