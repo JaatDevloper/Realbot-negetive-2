@@ -34,7 +34,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     """
     user = update.effective_user
     await update.message.reply_text(
-        f"Hello, {user.first_name}! I'm the Quiz Bot.\n\n"
+        f"Hello, {user.first_name}! I'm the Quiz love you Bot.\n\n"
         f"I can help you test your knowledge with various quizzes.\n\n"
         f"Use /quiz to start a quiz\n"
         f"Use /stats to see your performance\n"
