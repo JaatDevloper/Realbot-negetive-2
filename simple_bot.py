@@ -711,7 +711,7 @@ async def schedule_next_question(context: ContextTypes.DEFAULT_TYPE):
         type=Poll.QUIZ,
         correct_option_id=question["answer"],
         is_anonymous=False,
-        explanation="Marathon mode",
+        explanation=".💔🗿𝘐𝘕𝘚𝘈𝘕𝘌",
         open_period=timer_duration  # Add timer animation
     )
     
